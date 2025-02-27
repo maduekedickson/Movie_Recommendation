@@ -2,10 +2,21 @@ import streamlit as st
 import pandas as pd
 import requests
 import pickle
+import gdown  # Import gdown to download files
 
-# Load the processed data and similarity matrix
-with open('movie_data.pkl', 'rb') as file:
-    movies, cosine_sim = pickle.load(file)
+# Google Drive File ID for movie_data.pkl
+file_id = "1yR5Eru616dl54-G5OXlFhEghM19Pgv2L"
+output = "movie_data.pkl"
+
+# Download the file from Google Drive if it doesn’t exist
+try:
+    with open(output, "rb") as file:
+        movies, cosine_sim = pickle.load(file)
+except:
+    drive_link = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(drive_link, output, quiet=False)
+    with open(output, "rb") as file:
+        movies, cosine_sim = pickle.load(file)
 
 # Function to get movie recommendations
 def get_recommendations(title, cosine_sim=cosine_sim):
@@ -28,6 +39,7 @@ def fetch_poster(movie_id):
 
 # Streamlit UI
 st.image("image.png")
+
 st.title("Movie Recommendation System")
 
 selected_movie = st.selectbox("Select a movie:", movies['title'].values)
