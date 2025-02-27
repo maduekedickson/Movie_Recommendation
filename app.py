@@ -17,7 +17,7 @@ if not os.path.exists(output_file):
 
 # --- Load Data ---
 try:
-    with open(output, "rb") as file:
+    with open(output_file, "rb") as file:
         movies, cosine_sim = pickle.load(file)
 except FileNotFoundError:
     st.error("Error: Could not load movie_data.pkl. Check the file link and try again.")
@@ -39,6 +39,7 @@ def fetch_poster(movie_id):
     return f"https://image.tmdb.org/t/p/w500{data.get('poster_path', '')}" if data.get('poster_path') else "https://i.postimg.cc/0QNxYz4V/social.png"
 
 # --- Streamlit UI ---
+st.image('image.png')
 st.title("Movie Recommendation System")
 
 selected_movie = st.selectbox("Select a movie:", movies['title'].values)
