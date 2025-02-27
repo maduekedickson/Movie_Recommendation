@@ -2,21 +2,29 @@ import streamlit as st
 import pandas as pd
 import requests
 import pickle
-import gdown  # Import gdown to download files
+import gdown
+import os
 
 # Google Drive File ID for movie_data.pkl
 file_id = "1yR5Eru616dl54-G5OXlFhEghM19Pgv2L"
 output = "movie_data.pkl"
 
-# Download the file from Google Drive if it doesn’t exist
+# Ensure the file exists, otherwise download it
+if not os.path.exists(output):
+    try:
+        st.write("Downloading movie_data.pkl from Google Drive...")
+        drive_link = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(drive_link, output, quiet=False)
+    except Exception as e:
+        st.error(f"Failed to download movie_data.pkl. Error: {e}")
+
+# Load the processed data and similarity matrix
 try:
     with open(output, "rb") as file:
         movies, cosine_sim = pickle.load(file)
-except:
-    drive_link = f"https://drive.google.com/uc?id={file_id}"
-    gdown.download(drive_link, output, quiet=False)
-    with open(output, "rb") as file:
-        movies, cosine_sim = pickle.load(file)
+except FileNotFoundError:
+    st.error("Error: The file 'movie_data.pkl' was not found. Make sure the file exists and is accessible.")
+    st.stop()
 
 # Function to get movie recommendations
 def get_recommendations(title, cosine_sim=cosine_sim):
@@ -33,13 +41,10 @@ def fetch_poster(movie_id):
     url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}'
     response = requests.get(url)
     data = response.json()
-    poster_path = data['poster_path']
-    full_path = f"https://image.tmdb.org/t/p/w500{poster_path}"
-    return full_path
+    poster_path = data.get('poster_path', None)
+    return f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
 
 # Streamlit UI
-st.image("image.png")
-
 st.title("Movie Recommendation System")
 
 selected_movie = st.selectbox("Select a movie:", movies['title'].values)
@@ -57,5 +62,6 @@ if st.button('Recommend'):
                 movie_id = recommendations.iloc[j]['movie_id']
                 poster_url = fetch_poster(movie_id)
                 with col:
-                    st.image(poster_url, width=130)
+                    if poster_url:
+                        st.image(poster_url, width=130)
                     st.write(movie_title)
