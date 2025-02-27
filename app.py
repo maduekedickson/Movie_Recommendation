@@ -4,15 +4,16 @@ import requests
 import gdown
 import os
 
-# --- Google Drive File ID ---
-file_id = "1yR5Eru616dl54-G5OXlFhEghM19Pgv2L"
-output = "movie_data.pkl"
-drive_link = f"https://drive.google.com/uc?id={file_id}"
 
-# --- Download Movie Data if Not Present ---
-if not os.path.exists(output):
+
+# --- Google Drive File Download ---
+drive_link = "https://drive.google.com/uc?id=1yR5Eru616dl54-G5OXlFhEghM19Pgv2L"
+output_file = "movie_data.pkl"
+
+# Ensure the file is downloaded only once
+if not os.path.exists(output_file):
     st.info("Downloading movie_data.pkl from Google Drive...")
-    gdown.download(drive_link, output, quiet=False)
+    gdown.download(drive_link, output_file, quiet=False)
 
 # --- Load Data ---
 try:
